@@ -74,7 +74,6 @@ class InputManager(RunManager):
                 if param["type"] == "StateVector" and key == "value_min":
                     for x in range(len(val)):
                         iteration_list.append(self.iterations(param["value_min"][x], param["value_max"][x], param["n_samples"]))
-                    print("STATE VECTOR ", iteration_list)
                     combination_list[path] = self.set_stateVector(self.get_trackers_list(iteration_list, param["value_min"]))
                     combination_dict.update(combination_list)
 
@@ -127,29 +126,27 @@ class InputManager(RunManager):
                     combination_dict.update(combination_list)
                 
                 if param["type"] == "ndarray" and key == "value_min":
-                    val_min=param["value_min"]
-                    val_max=param["value_max"]
-                    # for x in range(len(val)):
-                    #      for y in range(len(val[x])):
-                    #         iteration_list.append(self.iterations(val_min[x][y], val_max[x][y], param["n_samples"]))
-                    self.darray_navigator(val, val_min, val_max, iteration_list,param["n_samples"])
-                    print("iteration_list")
-                    print(iteration_list)
+                    val_min=list(param["value_min"])
+                    val_max=list(param["value_max"])
+                    #for x in range(len(val)):
+                        #for y in range(len(val[x])):
+                            #iteration_list.append(self.iterations(val_min[x][y], val_max[x][y], param["n_samples"]))
+                    self.darray_navigator(val_min, val_max, iteration_list,param["n_samples"])
                     combination_list[path] = self.get_ndarray_trackers_list(iteration_list, param["value_min"])
+                    print("combination_list list:" , combination_list)
                     combination_dict.update(combination_list)
-                    print("combination_list ",combination_dict)
                 
 
         return combination_dict
 
 
 
-    def darray_navigator(self,val,val_min,val_max,iteration_list,n_samples):
-        if(type(val) is list):
-            for x in range(len(val)):
-                new_iteration_list = []
-                iteration_list.append(new_iteration_list)
-                self.darray_navigator(val[x],val_min[x],val_max[x],new_iteration_list,n_samples)
+    def darray_navigator(self,val_min,val_max,iteration_list,n_samples):
+        # new_iteration_list = []
+        if(type(val_min) is list):
+            for x in range(len(val_min)):
+            #  iteration_list.append(new_iteration_list)
+                self.darray_navigator(val_min[x],val_max[x],iteration_list,n_samples)
         else:
              iteration_list.append(self.iterations(val_min, val_max, n_samples))
         
@@ -161,7 +158,7 @@ class InputManager(RunManager):
         Args:
             self : self
             min_value : Minimum parameter value
-            maz_value : Maximum parameter value
+            max_value : Maximum parameter value
         """
         temp = []
         difference = max_value - min_value
@@ -176,12 +173,12 @@ class InputManager(RunManager):
         temp =[]
         for x in range(0, len(value_min)):
             temp.append(iterations_container_list[x])
-        list_combinations = list(itertools.product(*temp))
-
+            
+        list_combinations = [StateVector(tup) for tup in itertools.product(*temp)]
         #Using a set to remove any duplicates
-        set_combinations = list(set(list_combinations))
+        #set_combinations = list(set(list_combinations))
                 
-        return set_combinations
+        return list_combinations
 
     def get_ndarray_trackers_list(self, iterations_container_list, value_min):
         temp =[]
