@@ -72,16 +72,21 @@ def run_simulation(tracker, ground_truth, metric_manager, dir_name, groundtruth_
 
         for time, ctracks in tracker:
             #Update groundtruth, tracks and detections
-            #groundtruth.update(tracker.detector.groundtruth.groundtruth_paths)
-            groundtruth.update(ground_truth.groundtruth_paths)
+            try:
+                groundtruth.update(ground_truth.groundtruth_path)
+                if metric_manager is not None:
+                    metric_manager.add_data(ground_truth.groundtruth_path,ctracks,tracker.detector.detections)
+            except:
+                groundtruth.update(ground_truth)
+                if metric_manager is not None:
+                    metric_manager.add_data(ground_truth,ctracks,tracker.detector.detections)
+            groundtruth.update(ground_truth)
 
             tracks.update(ctracks)
             detections.update(tracker.detector.detections)
 
             RunmanagerMetrics.tracks_to_csv(dir_name,ctracks)
 
-            if metric_manager is not None:
-                metric_manager.add_data(ground_truth.groundtruth_paths,ctracks,tracker.detector.detections)
 
         if metric_manager is not None:
             #Generate the metrics
@@ -200,13 +205,13 @@ if __name__ == "__main__":
     try:
         configInput = args[0]
     except:
-        configInput= "C:\\Users\\gbellant\\Documents\\Projects\\Serapis\\config.yaml"
+        configInput= "C:\\Users\\Davidb1\\Documents\\Python\\data\\config.yaml"
 
 
     try:
         parametersInput = args[1]
     except:
-        parametersInput= "C:\\Users\\gbellant\\Documents\\Projects\\Serapis\\dummy3.json"
+        parametersInput= "C:\\Users\\Davidb1\\Documents\\Python\\data\\dummy.json"
 
 
     try:
