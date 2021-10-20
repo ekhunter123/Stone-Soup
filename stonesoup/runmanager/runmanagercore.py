@@ -9,7 +9,8 @@ from stonesoup.serialise import YAML
 
 from inputmanager import InputManager
 from runmanagermetrics import RunmanagerMetrics
-
+from stonesoup.writer.base import MetricsWriter
+from multiprocessing import Pool
 
 def read_json(json_input):
     """ Reads JSON Files and stores in dictionary
@@ -55,20 +56,23 @@ def run(config_path, parameters_path, groundtruth_setting, output_path=None):
         combo_dict, tracker, ground_truth, metric_manager)
     now = datetime.now()
     dt_string = now.strftime("%d_%m_%Y_%H_%M_%S")
-    for idx in range(0, len(trackers)):
+    """for idx in range(0, len(trackers)):
         for runs_num in range(0, json_data["runs_num"]):
             dir_name = f"metrics_{dt_string}/simulation_{idx}/run_{runs_num}"
             RunmanagerMetrics.parameters_to_csv(dir_name, combo_dict[idx])
             RunmanagerMetrics.generate_config(
                 dir_name, trackers[idx], ground_truths[idx], metric_managers[idx])
-            if groundtruth_setting == 0:
-                groundtruth = trackers[idx].detector.groundtruth
-            else:
-                groundtruth = ground_truths[idx]
+            
             print("RUN")
             run_simulation(trackers[idx], groundtruth, metric_managers[idx],
-                           dir_name, groundtruth_setting, idx, combo_dict)
+                           dir_name, groundtruth_setting, idx, combo_dict)"""
 
+    dir_name = f"metrics_{dt_string}/simulation_/run_"
+    all_args = [(trackers[idx], ground_truths[idx], metric_managers[idx],
+                           dir_name, groundtruth_setting, idx, combo_dict) for idx in range(0, len(trackers))]
+    print(all_args)
+    pool = Pool()
+    pool.map(run_simulation, all_args)
     # Final line of the log show total time taken to run.
     logging.info(f'All simulations completed. Time taken to run: {datetime.now() - now}')
 
