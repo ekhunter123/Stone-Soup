@@ -5,7 +5,6 @@ import sys
 from datetime import datetime
 from os import mkdir
 
-
 from stonesoup.serialise import YAML
 
 from inputmanager import InputManager
@@ -45,7 +44,7 @@ def run(config_path, parameters_path, groundtruth_setting, output_path=None):
         try:
             ground_truth = tracker.detector.groundtruth
         except Exception as e:
-            logging.error(e)
+            logging.error(f'No groundtruth in tracker detector {e}')
             print(f'No groundtruth in tracker detector {e}', flush=True)
 
     trackers = []
@@ -69,10 +68,9 @@ def run(config_path, parameters_path, groundtruth_setting, output_path=None):
             print("RUN")
             run_simulation(trackers[idx], groundtruth, metric_managers[idx],
                            dir_name, groundtruth_setting, idx, combo_dict)
-    
+
     # Final line of the log show total time taken to run.
     logging.info(f'All simulations completed. Time taken to run: {datetime.now() - now}')
-
 
 
 def run_simulation(tracker, ground_truth, metric_manager, dir_name, groundtruth_setting, index, combos):
@@ -119,11 +117,13 @@ def run_simulation(tracker, ground_truth, metric_manager, dir_name, groundtruth_
             RunmanagerMetrics.metrics_to_csv(dir_name, metrics)
 
     except Exception as e:
-        logging.error(f'{log_time}: Simulation {index} failed in {datetime.now() - log_time}. error: {e}  . Parameters: {combos[index]}')
+        logging.error(
+            f'{log_time}: simulation {index} / {len(combos)-1} failed in {datetime.now() - log_time}. error: {e}. parameters located /{dir_name}')
         print(f'Failed to run Simulation: {e}', flush=True)
 
     else:
-        logging.info(f'{log_time}: Simulation {index} / {len(combos)-1} ran successfully in {datetime.now() - log_time}. With Parameters: {combos[index]}')
+        logging.info(
+            f'{log_time}: simulation {index} / {len(combos)-1} ran successfully in {datetime.now() - log_time}. parameters located /{dir_name}')
         print('Success!', flush=True)
 
 
