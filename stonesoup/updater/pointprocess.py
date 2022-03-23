@@ -79,15 +79,16 @@ class PointProcessUpdater(Base):
                 weight_sum += new_weight
                 # Perform single target Kalman Update
                 temp_updated_component = self.updater.update(hypothesis)
-                updated_component = TaggedWeightedGaussianState(
-                    tag=prediction.tag if prediction.tag != "birth" else None,
-                    weight=new_weight,
-                    state_vector=temp_updated_component.mean,
-                    covar=temp_updated_component.covar,
-                    timestamp=temp_updated_component.timestamp
-                )
-                # Add updated component to mixture
-                updated_measurement_components.append(updated_component)
+                if temp_updated_component is not None:
+                    updated_component = TaggedWeightedGaussianState(
+                        tag=prediction.tag if prediction.tag != "birth" else None,
+                        weight=new_weight,
+                        state_vector=temp_updated_component.mean,
+                        covar=temp_updated_component.covar,
+                        timestamp=temp_updated_component.timestamp
+                    )
+                    # Add updated component to mixture
+                    updated_measurement_components.append(updated_component)
             weight_sum_list.append(weight_sum)
             for component in updated_measurement_components:
                 if self.normalisation:
@@ -168,7 +169,7 @@ class LCCUpdater(PointProcessUpdater):
         # Get the predicted weight sum
         predicted_weight_sum =\
             Probability.sum(hypothesis.prediction.weight for hypothesis in
-                            hypotheses[-1]) * self.prob_survival
+                            hypotheses[-1] if hypothesis.prediction.weight > 0) * self.prob_survival
         # Second order predicted cumulant c(2)
         predicted_c2 = self.second_order_cumulant * self.prob_survival**2
         # Detected predicted weight mu_d
